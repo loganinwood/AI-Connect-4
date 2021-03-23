@@ -3,13 +3,14 @@ import random
 import pygame
 import time
 
+
 SCREEN_WIDTH = 700
 SCREEN_HEIGHT = 600
 pygame.init()
 testboard = Board()
 draws = 0
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-screen.fill((255, 255, 255))
+screen.fill((0, 0, 128))
 running = True
 while running:
     # print(testboard.legal_moves())
@@ -25,8 +26,11 @@ while running:
             move = pos[0] // 100
             if move in testboard.legal_moves():
                 testboard.make_move(move)
-    screen.fill((255, 255, 255))
+    pos = pygame.mouse.get_pos()
+    column = pos[0] // 100
+    screen.fill((0, 0, 128))
     testboard.draw(screen)
+    testboard.highlight(column, screen)
     pygame.display.flip()
     if testboard.is_win():
         print("Game over, {} won!".format("Red" if not testboard.side else "Yellow"))

@@ -80,7 +80,13 @@ class Board:
         for i in range(7):
             for j in range(6):
                 val = self.board[i + j * 7]
-                if val == 1:
+                if val == 0:
+                    pygame.draw.circle(display, (255, 255, 255), (i * 100 + 50, j * 100 + 50), 40)
+                elif val == 1:
                     pygame.draw.circle(display, (255, 0, 0), (i * 100 + 50, j * 100 + 50), 40)
-                if val == 2:
+                elif val == 2:
                     pygame.draw.circle(display, (255, 255, 0), (i * 100 + 50, j * 100 + 50), 40)
+
+    def highlight(self, column, screen):
+        for i in range(self.rows[column]):
+            pygame.draw.circle(screen, (128, 128, 128), (column * 100 + 50, i * 100 + 50), 40)
