@@ -1,4 +1,7 @@
 import numpy as np
+import pygame
+
+
 class Board:
     def __init__(self):
         self.counter = 0
@@ -65,3 +68,19 @@ class Board:
 
     def is_draw(self):
         return self.counter == 42
+
+    def clear_board(self):
+        self.counter = 0
+        self.rows = [6] * 7
+        self.board = [0] * 42
+        self.moves = []
+        self.side = True
+
+    def draw(self, display):
+        for i in range(7):
+            for j in range(6):
+                val = self.board[i + j * 7]
+                if val == 1:
+                    pygame.draw.circle(display, (255, 0, 0), (i * 100 + 50, j * 100 + 50), 40)
+                if val == 2:
+                    pygame.draw.circle(display, (255, 255, 0), (i * 100 + 50, j * 100 + 50), 40)
