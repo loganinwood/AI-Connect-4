@@ -1,6 +1,6 @@
 from board import Board
 testboard = Board()
-for i in range(43):
+while True:
     print(testboard.legal_moves())
     move = input("Enter a move: ")
     while not move.isdecimal():
@@ -8,6 +8,9 @@ for i in range(43):
     move = int(move)
     testboard.make_move(move)
     print(testboard)
-    if testboard.is_win() or testboard.is_draw():
-        print("game over")
+    if testboard.is_win():
+        print("Game over, {} won!".format(not testboard.side))
+        exit()
+    if testboard.is_draw():
+        print("Game over, it's a draw!")
         exit()
