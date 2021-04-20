@@ -1,5 +1,9 @@
-import numpy as np
 import pygame
+
+WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
 
 
 class Board:
@@ -31,6 +35,9 @@ class Board:
             print("Not a legal move")
 
     def unmake_move(self):
+        if len(self.moves) == 0:
+            return
+
         move = self.moves.pop()
         self.rows[move] = self.rows[move] + 1
         self.side = not self.side
@@ -50,19 +57,31 @@ class Board:
         piece = 2 if self.side else 1
         for i in range(6):
             for j in range(4):
-                if self.board[7 * i + j] == piece and self.board[7 * i + j + 1] == piece and self.board[7 * i + j + 2] == piece and self.board[7 * i + j + 3] == piece:
+                if self.board[7 * i + j] == piece and \
+                   self.board[7 * i + j + 1] == piece and \
+                   self.board[7 * i + j + 2] == piece and \
+                   self.board[7 * i + j + 3] == piece:
                     return True
         for i in range(7):
             for j in range(3):
-                if self.board[i + j * 7] == piece and self.board[i + (j + 1) * 7] == piece and self.board[i + (j + 2) * 7] == piece and self.board[i + (j + 3) * 7] == piece:
+                if self.board[i + j * 7] == piece and \
+                   self.board[i + (j + 1) * 7] == piece and \
+                   self.board[i + (j + 2) * 7] == piece and \
+                   self.board[i + (j + 3) * 7] == piece:
                     return True
         for i in range(4):
             for j in range(3):
-                if self.board[j * 7 + i] == piece and self.board[(j + 1) * 7 + i + 1] == piece and self.board[(j + 2) * 7 + i + 2] == piece and self.board[(j + 3) * 7 + i + 3] == piece:
+                if self.board[j * 7 + i] == piece and \
+                   self.board[(j + 1) * 7 + i + 1] == piece and \
+                   self.board[(j + 2) * 7 + i + 2] == piece and \
+                   self.board[(j + 3) * 7 + i + 3] == piece:
                     return True
         for i in range(3, 7):
             for j in range(3):
-                if self.board[j * 7 + i] == piece and self.board[(j + 1) * 7 + i - 1] == piece and self.board[(j + 2) * 7 + i - 2] == piece and self.board[(j + 3) * 7 + i - 3] == piece:
+                if self.board[j * 7 + i] == piece and \
+                   self.board[(j + 1) * 7 + i - 1] == piece and \
+                   self.board[(j + 2) * 7 + i - 2] == piece and \
+                   self.board[(j + 3) * 7 + i - 3] == piece:
                     return True
         return False
 
@@ -80,13 +99,18 @@ class Board:
         for i in range(7):
             for j in range(6):
                 val = self.board[i + j * 7]
+
                 if val == 0:
-                    pygame.draw.circle(display, (255, 255, 255), (i * 100 + 50, j * 100 + 50), 40)
+                    color = WHITE
                 elif val == 1:
-                    pygame.draw.circle(display, (255, 0, 0), (i * 100 + 50, j * 100 + 50), 40)
+                    color = RED
                 elif val == 2:
-                    pygame.draw.circle(display, (255, 255, 0), (i * 100 + 50, j * 100 + 50), 40)
+                    color = YELLOW
+
+                center = (i * 100 + 50, j * 100 + 50)
+                pygame.draw.circle(display, color, center, 40)
 
     def highlight(self, column, screen):
         for i in range(self.rows[column]):
-            pygame.draw.circle(screen, (128, 128, 128), (column * 100 + 50, i * 100 + 50), 40)
+            center = (column * 100 + 50, i * 100 + 50)
+            pygame.draw.circle(screen, GRAY, center, 40)
