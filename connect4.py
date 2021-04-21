@@ -4,7 +4,10 @@ import pygame
 (SCREEN_WIDTH, SCREEN_HEIGHT) = 700, 700
 
 WHITE = (255, 255, 255)
+GRAY = (128, 128, 128)
+BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 128, 0)
 BLUE = (0, 0, 128)
 YELLOW = (255, 255, 0)
 
@@ -15,8 +18,12 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Connect-4")
 pygame.display.set_icon(pygame.image.load("icon.png"))
 
+# Control buttons / Game info
 font = pygame.font.Font(None, 32)
 move_text = font.render("Move:", True, WHITE)
+
+auto_button = pygame.Rect(280, 622, 140, 48)
+auto_button_text = font.render("Auto move", True, BLACK)
 
 running = True
 
@@ -37,22 +44,34 @@ while running:
         # handle MOUSEBUTTONUP
         elif event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            move = pos[0] // 100
-            if move in testboard.legal_moves():
-                testboard.make_move(move)
+
+            # Place piece down
+            if auto_button.collidepoint(pos):
+                print("Button")
+            elif pos[1] <= 600:
+                move = pos[0] // 100
+                if move in testboard.legal_moves():
+                    testboard.make_move(move)
 
     # Clear screen
     screen.fill(BLUE)
 
-    # Highlight selected column
     pos = pygame.mouse.get_pos()
-    column = pos[0] // 100
     testboard.draw(screen)
-    testboard.highlight(column, screen)
 
-    # Control buttons / Game Info
+    # Highlight selected column
+    if pos[1] <= 600:
+        column = pos[0] // 100
+        testboard.highlight(column, screen)
+
+    # Control buttons / Game info
     screen.blit(move_text, (20, 634))
 
+    # Auto place move button
+    pygame.draw.rect(screen, GREEN, auto_button)
+    screen.blit(auto_button_text, (292, 634))
+
+    # Display current move
     if testboard.side:
         move_color = RED
         move_color_text = "RED"
