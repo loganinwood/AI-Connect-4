@@ -1,4 +1,5 @@
 from board import Board
+from agent import MinmaxAgent
 import pygame
 
 (SCREEN_WIDTH, SCREEN_HEIGHT) = 700, 700
@@ -12,20 +13,23 @@ BLUE = (0, 0, 128)
 YELLOW = (255, 255, 0)
 
 pygame.init()
-testboard = Board()
+board = Board()
+agent = MinmaxAgent()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Connect-4")
 pygame.display.set_icon(pygame.image.load("icon.png"))
 
-# Control buttons / Game info
+# Control buttons / game info
 font = pygame.font.Font(None, 32)
-move_text = font.render("Move:", True, WHITE)
 
-auto_button = pygame.Rect(280, 622, 140, 48)
+turn_text = font.render("Move:", True, WHITE)
+
+auto_button_rect = pygame.Rect(280, 622, 140, 48)
 auto_button_text = font.render("Auto move", True, BLACK)
 
 running = True
+game_won = False
 
 while running:
     ev = pygame.event.get()
@@ -39,60 +43,83 @@ while running:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                move = testboard.unmake_move()
+                if game_won:
+                    game_won = False
+                move = board.undo_move()
 
         # handle MOUSEBUTTONUP
         elif event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
 
             # Place piece down
-            if auto_button.collidepoint(pos):
-                print("Button")
-            elif pos[1] <= 600:
-                move = pos[0] // 100
-                if move in testboard.legal_moves():
-                    testboard.make_move(move)
+            if not game_won:
+                # Find move by agent
+                if auto_button_rect.collidepoint(pos):
+                    print("searching...")
+                    (score, column) = agent.solve(board)
+                    print(score, column)
+
+                elif pos[1] <= 600:
+                    column = pos[0] // 100
+
+                    # Check if move is a winning move
+                    if board.is_winning_move(column):
+                        game_won = True
+                        side = "RED" if board.turn else "YELLOW"
+                        print(f"{side} has won!")
+
+                    # Make the move on the board
+                    board.make_move(column)
+
+                    # Check if game is drawn
+                    if board.is_draw():
+                        game_won = True
 
     # Clear screen
     screen.fill(BLUE)
 
     pos = pygame.mouse.get_pos()
-    testboard.draw(screen)
+    board.draw(screen)
 
-    # Highlight selected column
-    if pos[1] <= 600:
-        column = pos[0] // 100
-        testboard.highlight(column, screen)
+    if game_won:
+        # Display winner
+        if board.is_draw():
+            winner_color = WHITE
+            win_text = "No winner! DRAW"
+        elif board.turn:
+            winner_color = YELLOW
+            win_text = "YELLOW has won!"
+        else:
+            winner_color = RED
+            win_text = "RED has won!"
+
+        winner_blit = font.render(win_text, True, winner_color)
+        screen.blit(winner_blit, (480, 634))
+    else:
+        # Highlight selected column
+        if pos[1] <= 600:
+            column = pos[0] // 100
+            board.highlight(screen, column)
 
     # Control buttons / Game info
-    screen.blit(move_text, (20, 634))
+    screen.blit(turn_text, (20, 634))
 
     # Auto place move button
-    pygame.draw.rect(screen, GREEN, auto_button)
+    pygame.draw.rect(screen, GREEN, auto_button_rect)
     screen.blit(auto_button_text, (292, 634))
 
     # Display current move
-    if testboard.side:
-        move_color = RED
-        move_color_text = "RED"
+    if board.turn:
+        turn_color = RED
+        turn_color_text = "RED"
     else:
-        move_color = YELLOW
-        move_color_text = "YELLOW"
+        turn_color = YELLOW
+        turn_color_text = "YELLOW"
 
-    move_player = font.render(move_color_text, True, move_color)
-    screen.blit(move_player, (90, 634))
+    turn_blit = font.render(turn_color_text, True, turn_color)
+    screen.blit(turn_blit, (90, 634))
 
     # Update screen
     pygame.display.flip()
-
-    if testboard.is_win():
-        winning_side = "Red" if not testboard.side else "Yellow"
-        print("Game over, {} won!".format(winning_side))
-        # print(testboard)
-        running = False
-    if testboard.is_draw():
-        print("Game over, it's a draw!")
-        # print(testboard)
-        running = False
 
 pygame.quit()
