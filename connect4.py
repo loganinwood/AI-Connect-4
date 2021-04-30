@@ -57,8 +57,7 @@ while running:
                 # Find move by agent
                 if auto_button_rect.collidepoint(pos):
                     print("searching...")
-                    (score, column) = agent.solve(board)
-                    print(score, column)
+                    score = agent.solve(board)
 
                 elif pos[1] <= 600:
                     column = pos[0] // 100
