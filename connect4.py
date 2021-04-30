@@ -29,7 +29,8 @@ auto_button_rect = pygame.Rect(280, 622, 140, 48)
 auto_button_text = font.render("Auto move", True, BLACK)
 
 running = True
-game_won = False
+game_won = 0
+# 0 - No winner, 1 - Player won, 2 - Draw
 
 while running:
     ev = pygame.event.get()
@@ -64,7 +65,7 @@ while running:
 
                     # Check if move is a winning move
                     if board.is_winning_move(column):
-                        game_won = True
+                        game_won = 1
                         side = "RED" if board.turn else "YELLOW"
                         print(f"{side} has won!")
 
@@ -72,8 +73,8 @@ while running:
                     board.make_move(column)
 
                     # Check if game is drawn
-                    if board.is_draw():
-                        game_won = True
+                    if not game_won and board.is_draw():
+                        game_won = 2
 
     # Clear screen
     screen.fill(BLUE)
@@ -83,7 +84,7 @@ while running:
 
     if game_won:
         # Display winner
-        if board.is_draw():
+        if game_won == 2:
             winner_color = WHITE
             win_text = "No winner! DRAW"
         elif board.turn:
