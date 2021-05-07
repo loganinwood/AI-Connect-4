@@ -60,11 +60,10 @@ while running:
                 if auto_button_rect.collidepoint(pos):
                     print("searching...")
                     score, column = agent.solve(board, 8)
-                    board.make_move_safe(column, agent)
-
                 elif pos[1] <= 600:
                     column = pos[0] // 100
 
+                if column is not None:
                     # Check if move is a winning move
                     if board.is_winning_move(column):
                         game_won = 1
