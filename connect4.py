@@ -1,6 +1,7 @@
 from board import Board
 from agent import MinmaxAgent
 import pygame
+import numpy as np
 
 (SCREEN_WIDTH, SCREEN_HEIGHT) = 700, 700
 
@@ -32,6 +33,7 @@ running = True
 game_won = 0
 # 0 - No winner, 1 - Player won, 2 - Draw
 
+
 while running:
     ev = pygame.event.get()
 
@@ -46,7 +48,7 @@ while running:
             if event.key == pygame.K_LEFT:
                 if game_won:
                     game_won = False
-                move = board.undo_move()
+                move = board.unmake_move_safe(agent)
 
         # handle MOUSEBUTTONUP
         elif event.type == pygame.MOUSEBUTTONUP:
@@ -57,7 +59,8 @@ while running:
                 # Find move by agent
                 if auto_button_rect.collidepoint(pos):
                     print("searching...")
-                    score = agent.solve(board)
+                    score, column = agent.solve(board, 8)
+                    board.make_move_safe(column, agent)
 
                 elif pos[1] <= 600:
                     column = pos[0] // 100
@@ -69,7 +72,8 @@ while running:
                         print(f"{side} has won!")
 
                     # Make the move on the board
-                    board.make_move(column)
+                    board.make_move_safe(column, agent)
+                    # make_move(column, board)
 
                     # Check if game is drawn
                     if not game_won and board.is_draw():

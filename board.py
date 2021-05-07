@@ -1,5 +1,5 @@
 import pygame
-
+import numpy as np
 # COLORS
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
@@ -14,7 +14,7 @@ class Board:
     def __init__(self):
         self.move_count = 0
         self.turn = True
-
+        self.bval = 0
         self.moves = []
         # self.board = [[0] * BOARD_WIDTH in range(BOARD_HEIGHT)]
         self.board = []
@@ -126,6 +126,10 @@ class Board:
 
         self.moves.append(column)
         self.move_count += 1
+        if self.turn:
+            self.bval += piece_table[x * (6 - y)]
+        else:
+            self.bval -= piece_table[x * (6 - y)]
         self.turn = not self.turn
 
         return True
@@ -167,3 +171,45 @@ class Board:
         for i in range(self.heights[column], BOARD_HEIGHT):
             center = (column * 100 + 50, (BOARD_HEIGHT - i - 1) * 100 + 50)
             pygame.draw.circle(screen, GRAY, center, 40)
+
+    def make_move_safe(self, move, agent):
+        self.update_zobrist(move, agent)
+        self.make_move(move)
+
+    def unmake_move_safe(self, agent):
+        move = self.undo_move()
+        self.update_zobrist(move, agent)
+        return move
+
+    def update_zobrist(self, move, agent):
+        """
+        Update zobrist hash from given move
+        """
+        side = 0 if self.turn else 1
+        val = 7 * (self.heights[move] - 1) + move
+        agent.ZOBRIST ^= agent.ZBOARD[side][val]
+
+
+
+piece_table = np.array([3, 4, 5, 7, 5, 4, 3,
+               4, 6, 8, 10, 8, 6, 4,
+               5, 8, 11, 13, 11, 8, 5,
+               5, 8, 11, 13, 11, 8, 5,
+               4, 6, 8, 10, 8, 6, 4,
+               3, 4, 5, 7, 5, 4, 3])
+
+evalmap = {(0, 0, 0, 0): 0, (1, 0, 0, 0): 1, (2, 0, 0, 0): -1, (0, 1, 0, 0): 1, (1, 1, 0, 0): 2,
+           (2, 1, 0, 0): 0, (0, 2, 0, 0): -1, (1, 2, 0, 0): 0, (2, 2, 0, 0): -2, (0, 0, 1, 0): 1,
+           (1, 0, 1, 0): 2, (2, 0, 1, 0): 0, (0, 1, 1, 0): 2, (1, 1, 1, 0): 6, (2, 1, 1, 0): 1, (0, 2, 1, 0): 0,
+           (1, 2, 1, 0): 1, (2, 2, 1, 0): -1, (0, 0, 2, 0): -1, (1, 0, 2, 0): 0, (2, 0, 2, 0): -2,
+           (0, 1, 2, 0): 0, (1, 1, 2, 0): 2, (2, 1, 2, 0): -1, (0, 2, 2, 0): -2, (1, 2, 2, 0): -1,
+           (2, 2, 2, 0): -6, (0, 0, 0, 1): 1, (1, 0, 0, 1): 2, (2, 0, 0, 1): 0, (0, 1, 0, 1): 2, (1, 1, 0, 1): 6,
+           (2, 1, 0, 1): 1, (0, 2, 0, 1): 0, (1, 2, 0, 1): 1, (2, 2, 0, 1): -1, (0, 0, 1, 1): 2, (1, 0, 1, 1): 6,
+           (2, 0, 1, 1): 1, (0, 1, 1, 1): 6, (1, 1, 1, 1): 4, (2, 1, 1, 1): 2, (0, 2, 1, 1): 1, (1, 2, 1, 1): 2,
+           (2, 2, 1, 1): 0, (0, 0, 2, 1): 0, (1, 0, 2, 1): 1, (2, 0, 2, 1): -1, (0, 1, 2, 1): 1, (1, 1, 2, 1): 2,
+           (2, 1, 2, 1): 0, (0, 2, 2, 1): -1, (1, 2, 2, 1): 0, (2, 2, 2, 1): -2, (0, 0, 0, 2): -1, (1, 0, 0, 2): 0,
+           (2, 0, 0, 2): 2, (0, 1, 0, 2): 0, (1, 1, 0, 2): 1, (2, 1, 0, 2): -1, (0, 2, 0, 2): -2, (1, 2, 0, 2): -1,
+           (2, 2, 0, 2): -6, (0, 0, 1, 2): 0, (1, 0, 1, 2): 1, (2, 0, 1, 2): -1, (0, 1, 1, 2): 1,
+           (1, 1, 1, 2): 2, (2, 1, 1, 2): 0, (0, 2, 1, 2): -1, (1, 2, 1, 2): 0, (2, 2, 1, 2): -2, (0, 0, 2, 2): -2,
+           (1, 0, 2, 2): -1, (2, 0, 2, 2): -6, (0, 1, 2, 2): -1, (1, 1, 2, 2): 0, (2, 1, 2, 2): -2, (0, 2, 2, 2): -6,
+           (1, 2, 2, 2): -2, (2, 2, 2, 2): -4}
